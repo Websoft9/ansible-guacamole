@@ -1,0 +1,72 @@
+---
+- name: docker pull images
+  docker_image:
+    name: {{ item }}
+    source: pull
+  with_items:
+    - mysql:5.7
+    - guacamole/guacd
+    - guacamole/guacamole
+
+- name: Create guacd container
+  docker_container:
+    name: guacd
+    image: guacamole/guacd
+    ports:
+      - "4822:4822"
+    state: started
+    restart: yes
+    restart_policy: always
+
+- name: Create mysql date dirctory
+  file: 
+    path: /data/mysql
+    state: directory
+
+- name: Create mysql container
+  docker_container:
+    name: mysql
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - /data/mysql:/var/lib/mysql
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ mysql_password }}"
+    state: started
+    restart: yes
+    restart_policy: always
+
+- name: Createa guacamole container
+  docker_container:
+    name: guacamole
+    image: guacamole/guacamole
+    ports:
+      - "8080:8080"
+    links:
+      - mysql:mysql
+      - guacd:guacd
+    env:
+      - MYSQL_USER="{{mysql_user}}"
+      - MYSQL_PASSWORD="{{mysql_password}}"
+      - MYSQL_DATABASE=guacamole
+    state: started
+    restart: yes
+    restart_policy: always
+
+- name: generate initdb.sql
+  command: docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > initdb.sql
+  args:
+    chdir: ~/
+
+- name: initializ mysql
+  command: docker exec -i mysql sh -c 'exec mysql -uroot -p"{{mysql_password}}" guacamole' < initdb.sql
+  args:
+    chdir: ~/
+
+- name: delete initdb.sql
+  file:
+    path: ~/initdb.sql
+    state: absent
+    
+# TODO: 设置nginx端口转发
