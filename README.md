@@ -1,4 +1,4 @@
-# BT 自动化安装与部署
+# Guacamole 自动化安装与部署
 
 本项目是由 [Websoft9](http://www.websoft9.com) 研发的 [Guacamole](https://guacamole.apache.org/) 自动化安装程序，开发语言是 Java。使用本项目，只需要用户在 Linux 上运行一条命令，即可自动化安装 BT，让原本复杂的安装过程变得没有任何技术门槛。  
 
@@ -15,7 +15,7 @@
 
 更多请见[参数表](/docs/zh/stack-components.md)
 
-## 本项目安装的是 BT 最新版吗？
+## 本项目安装的是 Guacamole 最新版吗？
 
 本项目采用官方提供的安装脚本进行安装，官方会在安装脚本中对宝塔的版本进行控制，即每一次安装均可保证为 BT 官方发布的最新稳定版。
 
