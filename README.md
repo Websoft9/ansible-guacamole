@@ -1,61 +1,50 @@
-Playbook 主体结构
-  - group_vars:组变量
-  - roles:角色
-  - main.yml : playbook入口文件
+# BT 自动化安装与部署
 
-roles 结构
+本项目是由 [Websoft9](http://www.websoft9.com) 研发的 [Guacamole](https://guacamole.apache.org/) 自动化安装程序，开发语言是 Java。使用本项目，只需要用户在 Linux 上运行一条命令，即可自动化安装 BT，让原本复杂的安装过程变得没有任何技术门槛。  
 
- - files: 需要上传的文件
+本项目是开源项目，采用 LGPL3.0 开源协议。
 
- - handlers: 服务重启
+## 配置要求
 
- - tasks: 核心任务部分
+操作系统：目支持 CentOS7.x, Ubuntu, Debian 以上部署此脚本，确保是干净的操作系统，没有安装过其它环境带的Apache/Nginx/php/MySQL 
+硬件配置：最低1核1G，10G系统盘空间，否则无法运行
 
- - templates: 模板文件,多用于需要动态改变的配置文件
+## 组件
 
- - meta: 保存当前roles所依赖的其他roles信息(当前roles运行前所需要的roles)
+包含的核心组件为：BT（中英文可选）, LAMP/LNMP等
 
- - defaults: 保存当前roles默认变量
+更多请见[参数表](/docs/zh/stack-components.md)
 
-group_vars 结构
- - all.yml: 组变量
+## 本项目安装的是 BT 最新版吗？
 
+本项目采用官方提供的安装脚本进行安装，官方会在安装脚本中对宝塔的版本进行控制，即每一次安装均可保证为 BT 官方发布的最新稳定版。
 
-roles 编写注意事项:
- 1. 尽量可以单独使用
- 2. 不能单独使用的,一定要在 meta中声明依赖关系,比如在php需要依赖apache,写法看本模板中example中的 meta 
- 3. 上传的配置文件存在多版本问题 使用template模块上传 配置文件差异使用jinja模板处理
+我们会定期检查安装脚本 URL 地址的准确性，以保证用户可以顺利安装。
 
+## 安装指南
 
-变量注意事项:
-  1. 变量优先级 -e 选项指定的变量 > group_vars > inventory 主机清单中定义的变量 > play剧本中vars
-  2. roles中的变量修改使用优先级覆盖,使用-e参数以及group_vars,保持roles变量默认
-  3. remote_user 变量 默认root,为了适应aws和azure,使用-e覆盖[-e remote_user=ubuntu]
-
-common 和 final 默认是空文件夹 运行是会从GitHub上clone下来,common 和 final 已经clone 则会更新,以保持最新
-
-**play编写尽量使用模块,少用shell,command等模块**
-
-
-
-**随机密码生成统一采用**
-
-  `pwgen -ncCs 10 1`
+登录 Linux，运行下面的**命令脚本**即可启动自动化部署，然后耐心等待，直至安装成功。
 
 ```
-参数：
--c or –capitalize
-密码中至少包含一个大写字母
+#非 root 用户登录后，需先提升成为 root 权限
+sudo su -
 
--n or –numerals
-密码中至少包含一个数字
+#自动化安装命令
+wget -N https://raw.githubusercontent.com/Websoft9/linux/master/ansible_script/install.py ; python install.py playb=guacamole url=https://github.com/Websoft9/ansible-guacamole.git init=0 ansible=y
 
--C
-在列中打印生成的密码
-
--s or –secure
-生成完全随机密码
 ```
 
+注意：  
+
+1. 自动化脚本需服务器上已经安装 Python 2.7 或以上版本方可运行，一般操作系统会自带 Python。如果无法运行，系统会提示用户先安装 Python，再运行自动化安装命令。
+2. 由于自动化安装过程中有大量下载任务，若网络不通（或速度太慢）会引起下载失败，从而导致安装程序终止运行。此时，请重置服务器后再次尝试安装，若仍然无法完成，请使用我们在公有云上发布的 [BT 镜像](https://apps.websoft9.com/bt) 的部署方式
 
 
+## 文档
+
+文档链接：https://support.websoft9.com/docs/guacamole
+
+## FAQ
+
+- 命令脚本部署与镜像部署有什么区别？请参考[镜像部署-vs-脚本部署](https://support.websoft9.com/docs/faq/zh/bz-product.html#镜像部署-vs-脚本部署)
+- 本项目支持在 Ansible Tower 上运行吗？支持
