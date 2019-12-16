@@ -59,10 +59,26 @@
   args:
     chdir: ~/
 
-- name: initializ mysql
-  command: docker exec -i mysql sh -c 'exec mysql -uroot -p"{{mysql_password}}" guacamole' < initdb.sql
-  args:
-    chdir: ~/
+- name: initializ mysql -1 get docker0's gateway
+  command: ip a | grep 'docker0' | awk -F 'link/ether' 'NR==2{print $1}' | awk -F '/' '{print $1}' | awk -F ' ' '{print $2}'
+  register: docker0_gateway
+
+- name: initializ mysql -2 create guacamole database
+  mysql_db:
+    name: guacamole
+    login_root: root
+    login_password: "{{mysql_password}}"
+    login_host: "{{docker0.gateway.stdout}}"
+    state: present
+
+- name: initializ mysql -3 import guacamole tables
+  mysql_db:
+    name: guacamole
+    login_root: root
+    login_password: "{{mysql_password}}"
+    login_host: "{{docker0.gateway.stdout}}"
+    state: import
+    target: ~/initdb.sql
 
 - name: delete initdb.sql
   file:
