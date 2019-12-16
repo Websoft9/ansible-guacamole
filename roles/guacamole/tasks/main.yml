@@ -1,7 +1,7 @@
 ---
 - name: docker pull images
   docker_image:
-    name: {{ item }}
+    name: "{{ item }}"
     source: pull
   with_items:
     - mysql:5.7
@@ -32,7 +32,7 @@
     volumes:
       - /data/mysql:/var/lib/mysql
     env:
-      MYSQL_ROOT_PASSWORD: "{{ mysql_password }}"
+      MYSQL_ROOT_PASSWORD: "{{mysql_password}}"
     state: started
     restart: yes
     restart_policy: always
@@ -47,36 +47,39 @@
       - mysql:mysql
       - guacd:guacd
     env:
-      - MYSQL_USER="{{mysql_user}}"
-      - MYSQL_PASSWORD="{{mysql_password}}"
-      - MYSQL_DATABASE=guacamole
+      MYSQL_USER: "{{mysql_user}}"
+      MYSQL_PASSWORD: "{{mysql_password}}"
+      MYSQL_DATABASE: "guacamole"
     state: started
     restart: yes
     restart_policy: always
 
 - name: generate initdb.sql
-  command: docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > initdb.sql
+  shell: docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysql > initdb.sql
   args:
     chdir: ~/
 
 - name: initializ mysql -1 get docker0's gateway
-  command: ip a | grep 'docker0' | awk -F 'link/ether' 'NR==2{print $1}' | awk -F '/' '{print $1}' | awk -F ' ' '{print $2}'
+  shell: ip a | grep 'docker0' | awk -F 'link/ether' 'NR==2{print $1}' | awk -F '/' '{print $1}' | awk -F ' ' '{print $2}'
   register: docker0_gateway
 
-- name: initializ mysql -2 create guacamole database
+- name: initializ mysql -2 install mysql-client-core-5.7
+  apt: name=mysql-client-core-5.7  state=latest
+
+- name: initializ mysql -3 create guacamole database
   mysql_db:
     name: guacamole
-    login_root: root
+    login_user: "{{mysql_user}}"
     login_password: "{{mysql_password}}"
-    login_host: "{{docker0.gateway.stdout}}"
+    login_host: "{{docker0_gateway.stdout}}"
     state: present
 
-- name: initializ mysql -3 import guacamole tables
+- name: initializ mysql -4 import guacamole tables
   mysql_db:
     name: guacamole
-    login_root: root
+    login_user: "{{mysql_user}}"
     login_password: "{{mysql_password}}"
-    login_host: "{{docker0.gateway.stdout}}"
+    login_host: "{{docker0_gateway.stdout}}"
     state: import
     target: ~/initdb.sql
 

@@ -25,9 +25,9 @@
       name: pip
       extra_args: --upgrade
 
-  - name: pip pexpect
+  - name: pip requirements
     pip:
-      name: pexpect
+      name: [pexpect,docker]
 
   - name: Configuration yum-cron
     copy: src=yum-cron.conf dest=/etc/yum/

@@ -21,7 +21,7 @@
     - { role: cloud, tags: "cloud" }
     - { role: docker, tags: "docker" }
     - { role: nginx, tags: "nginx" }
-    - { role: guacamole, tag: "guacamole" }
+    - { role: guacamole, tags: "guacamole" }
     - { role: end , tags: "end" } 
 
   
