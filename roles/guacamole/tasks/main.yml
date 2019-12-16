@@ -86,3 +86,10 @@
     state: absent
     
 # TODO: 设置nginx端口转发
+- name: copy nginx configuration file 
+  copy: 
+    src: default
+    dest: /etc/nginx/conf.d/default.conf
+
+- name: restart nginx
+  service: name=nginx  state=restarted
