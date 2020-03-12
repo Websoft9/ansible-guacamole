@@ -88,7 +88,7 @@
     path: ~/initdb.sql
     state: absent
     
-# TODO: 设置nginx端口转发
+# 设置nginx端口转发
 - name: copy nginx configuration file 
   copy: 
     src: default
